@@ -8,17 +8,17 @@
     "task-2": {
       "id": "task-2",
       "content": "Code",
-      "completed": false
+      "completed": true
     },
     "task-3": {
       "id": "task-3",
       "content": "Sleep",
-      "completed": false
+      "completed": true
     },
     "task-4": {
       "id": "task-4",
       "content": "Eat",
-      "completed": false
+      "completed": true
     }
   },
   "columns": [
@@ -26,15 +26,15 @@
       "id": "column-1",
       "title": "To do",
       "taskIds": [
-        "task-3",
-        "task-2",
-        "task-4"
+        "task-4",
+        "task-2"
       ]
     },
     {
       "id": "column-2",
       "title": "Done",
       "taskIds": [
+        "task-3",
         "task-1"
       ]
     }

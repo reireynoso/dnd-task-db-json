@@ -2,6 +2,8 @@ import './App.css';
 import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'
 import React, { Component } from 'react'
+import SignUpForm from './SignUpForm'
+import Header from './Header'
 
 const styleContainer = {
   "display": 'flex'
@@ -10,21 +12,53 @@ const styleContainer = {
 export default class App extends Component {
   state={
     tasks: {},
-    columns: []
+    columns: [],
+    loggedIn: false,
+    currentUser: 'rei'
   }
 
   componentDidMount = () => {
-    fetch(`http://localhost:3000/tasks`)
+    // const token = localStorage.getItem("token")
+    // if(token){
+    //   fetch()
+    // }
+    // console.log(localStorage.getItem('token'))
+
+    // const token = localStorage.getItem('token')
+    // fetch(`http://localhost:3000/api/v1/auto_login`,{
+    //   headers: {
+    //     "Authorization": token
+    //   }
+    // })
+    // .then(resp => resp.json())
+    // .then(data => console.log(data))
+
+    fetch(`http://localhost:4000/tasks`)
     .then(resp => resp.json())
     .then(tasks => this.setState({
       tasks: tasks
     }))
 
-    fetch(`http://localhost:3000/columns`)
+    fetch(`http://localhost:4000/columns`)
     .then(resp => resp.json())
     .then(columns => this.setState({
       columns: columns
     }))
+  }
+
+  handleLogin = (signUpCred) => {
+    // console.log(signUpCred.user.username)
+    this.setState({
+      loggedIn: true,
+      currentUser: signUpCred.username
+    })
+  }
+
+  handleLogOut = () => {
+    this.setState({
+      loggedIn: false,
+      currentUser: ''
+    })
   }
 
   onDragEnd = result => {
@@ -45,7 +79,7 @@ export default class App extends Component {
       if (column.id === result.destination.droppableId){ //iterate through columns to match the destination ID
         column.taskIds = [...column.taskIds, result.draggableId] //updates match's task array and add the dragged task
         
-        fetch(`http://localhost:3000/columns/${column.id}`,{
+        fetch(`http://localhost:4000/columns/${column.id}`,{
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -72,7 +106,7 @@ export default class App extends Component {
         // console.log(removeTask)
         column.taskIds = removeTask
 
-        fetch(`http://localhost:3000/columns/${column.id}`,{
+        fetch(`http://localhost:4000/columns/${column.id}`,{
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -96,8 +130,8 @@ export default class App extends Component {
   }
 
   handleOnCompleted = (task) => {
-    console.log(task)
-    fetch(`http://localhost:3000/tasks/`,{
+    // console.log(task)
+    fetch(`http://localhost:4000/tasks/`,{
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -124,15 +158,22 @@ export default class App extends Component {
   render() {
     // console.log(this.state.columns)
     return (
-      <DragDropContext onDragEnd={this.onDragEnd}>
-        <div style={styleContainer}>
-          {this.state.columns.map(column=>{
-            const tasks = column.taskIds.map(taskId => this.state.tasks[taskId])
-            return <Column key={column.id} column={column} tasks={tasks} handleOnCompleted={this.handleOnCompleted}/>
-          })}
-        </div>
-      </DragDropContext>
-      
+      <div>
+        <Header currentUser={this.state.currentUser} handleLogOut={this.handleLogOut}/>
+
+        {this.state.currentUser ? 
+          <DragDropContext onDragEnd={this.onDragEnd}>
+          <div style={styleContainer}>
+            {this.state.columns.map(column=>{
+              const tasks = column.taskIds.map(taskId => this.state.tasks[taskId])
+              return <Column key={column.id} column={column} tasks={tasks} handleOnCompleted={this.handleOnCompleted}/>
+            })}
+          </div>
+          </DragDropContext>
+          :
+          <SignUpForm handleLogin={this.handleLogin}/>         
+        }
+      </div>
     )
   }
 }
